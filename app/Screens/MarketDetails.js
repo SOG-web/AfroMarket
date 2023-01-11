@@ -1,64 +1,79 @@
-import { FlatList, StyleSheet, View, Text } from "react-native";
-import React, { useEffect, useState } from "react";
-import ProductCard from "../Components/ProductCard";
-import Colors from "../Config/Colors";
-import { OutlineBtn } from "../Components/AppBtn";
-import AppText, { BoldText, MeidumText } from "../Components/AppText";
-import Card from "../Components/Card";
-import axios from "axios";
-import ActivityIndicator from "../Components/ActivityIndicator";
+import { FlatList, StyleSheet, View, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import ProductCard from '../Components/ProductCard';
+import Colors from '../Config/Colors';
+import { OutlineBtn } from '../Components/AppBtn';
+import AppText, { BoldText, MeidumText } from '../Components/AppText';
+import Card from '../Components/Card';
+import axios from 'axios';
+import ActivityIndicator from '../Components/ActivityIndicator';
+import { base_url } from '../Constants/api';
+import * as SecureStore from 'expo-secure-store';
+
+const key = 'authToken';
+
+const token = SecureStore.getItemAsync(key);
+
 export default function MarketDetails({ navigation, route }) {
   const { id, other } = route.params;
   const [topProducts, setTopProducts] = useState([]);
   const [curentMerchant, setCurrentMerchant] = useState({});
   const [curentMerchantDet, setCurrentMerchantDet] = useState({});
   const [loading, setLoading] = useState(true);
-  const apiEndpoint = "https://afromarket-be-ekn6j.ondigitalocean.app";
+  const [reviews, setReviews] = useState([]);
+  const apiEndpoint = base_url;
+
   useEffect(() => {
     setLoading(true);
     const getCurrentMerchant = async () => {
       setLoading(true);
       const { data } = await axios.get(
-        `${apiEndpoint}/afro-market/v1/merchant/view/${id}`
+        `${apiEndpoint}/afro-market/v1/merchant/view/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token['_3']}`,
+          },
+        }
       );
-      setCurrentMerchant(data.data, "current Merchant");
-      setCurrentMerchantDet(data.data.merchant, "current Merchant");
+      setCurrentMerchant(data.data, 'current Merchant');
+      setCurrentMerchantDet(data.data.merchant, 'current Merchant');
     };
 
     const getMerchantProducts = async () => {
       setLoading(true);
       const { data } = await axios.get(
-        `${apiEndpoint}/afro-market/v1/product/by-merchant/${id}?limit=10&page=1`
+        `${apiEndpoint}/afro-market/v1/product/by-merchant/${id}?limit=10&page=1`,
+        {
+          headers: {
+            Authorization: `Bearer ${token['_3']}`,
+          },
+        }
       );
       setTopProducts(data.data.products.data.rows);
       setLoading(false);
     };
+
+    const getMerchantReview = async () => {
+      console.log(id);
+      console.log(token['_3']);
+      setLoading(true);
+      const { data } = await axios.get(
+        `${apiEndpoint}/afro-market/v1/review/merchant/${id}?limit=10&page=1`,
+        {
+          headers: {
+            Authorization: `Bearer ${token['_3']}`,
+          },
+        }
+      );
+      console.log(data.data.reviews.data, 'reviews');
+      setReviews(data.data.reviews.data.rows);
+      setLoading(false);
+    };
     getCurrentMerchant();
     getMerchantProducts();
+    getMerchantReview();
   }, []);
-  const ratingReviews = [
-    {
-      id: 1,
-      rating: 4.2,
-      review:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maiores voluptates quisquam amet non veritatis inventore dolores assumenda repudiandae dicta voluptatem.",
-      customer: "Jameson Iweala",
-    },
-    {
-      id: 2,
-      rating: 3.9,
-      review:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maiores voluptates quisquam amet non veritatis inventore dolores assumenda repudiandae dicta voluptatem.",
-      customer: "Samson Iweala",
-    },
-    {
-      id: 3,
-      rating: 4.2,
-      review:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maiores voluptates quisquam amet non veritatis inventore dolores assumenda repudiandae dicta voluptatem dolores assumenda repudiandae dicta voluptatem dolores assumenda repudiandae dicta voluptatem.",
-      customer: "John Iweala",
-    },
-  ];
+
   if (loading) {
     return <ActivityIndicator visible={loading} />;
   }
@@ -70,7 +85,7 @@ export default function MarketDetails({ navigation, route }) {
           ListHeaderComponent={
             <>
               <Card
-                address={" " + curentMerchantDet.address}
+                address={' ' + curentMerchantDet.address}
                 numReviews={`${curentMerchant.no_of_reviews}`}
                 rating={curentMerchantDet.ratings}
                 title={curentMerchantDet.business_name}
@@ -78,8 +93,8 @@ export default function MarketDetails({ navigation, route }) {
                 style={{
                   backgroundColor: Colors.light,
                   padding: 10,
-                  justifyContent: "center",
-                  alignSelf: "center",
+                  justifyContent: 'center',
+                  alignSelf: 'center',
                 }}
               />
               {topProducts.length > 0 ? (
@@ -89,7 +104,7 @@ export default function MarketDetails({ navigation, route }) {
                     paddingHorizontal: 20,
                     paddingVertical: 5,
                   }}
-                  text="Top Products"
+                  text='Top Products'
                 />
               ) : (
                 <MeidumText
@@ -97,9 +112,9 @@ export default function MarketDetails({ navigation, route }) {
                     fontSize: 20,
                     paddingHorizontal: 20,
                     paddingVertical: 5,
-                    textAlign: "center",
+                    textAlign: 'center',
                   }}
-                  text="No Product Available"
+                  text='No Product Available'
                 />
               )}
             </>
@@ -110,10 +125,10 @@ export default function MarketDetails({ navigation, route }) {
           renderItem={({ item }) => (
             <ProductCard
               handlePress={() =>
-                navigation.navigate("productDetails", { id: item.id })
+                navigation.navigate('productDetails', { id: item.id })
               }
               img={item.images[0]}
-              price={item.price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")}
+              price={item.price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
               title={item.name}
             />
           )}
@@ -122,48 +137,62 @@ export default function MarketDetails({ navigation, route }) {
               {topProducts.length > 0 ? (
                 <OutlineBtn
                   style={{
-                    alignSelf: "center",
-                    width: "90%",
+                    alignSelf: 'center',
+                    width: '90%',
                     padding: 10,
                   }}
-                  title="View All Products"
+                  title='View All Products'
                   color={Colors.primary}
                 />
               ) : null}
 
               <View style={styles.rating}>
-                <View style={styles.ratingTxt}>
-                  <MeidumText text="Ratings & Reviews" />
-                  <AppText text="View All" />
-                </View>
-                <FlatList
-                  data={ratingReviews}
-                  keyExtractor={(item) => item.id.toString()}
-                  renderItem={({ item }) => (
-                    <View style={{ paddingVertical: 10 }}>
-                      <AppText text={item.review} />
-                      <MeidumText
-                        text={item.customer}
-                        style={{ fontSize: 16, paddingTop: 5 }}
-                      />
+                {reviews.length > 0 ? (
+                  <>
+                    <View style={styles.ratingTxt}>
+                      <MeidumText text='Ratings & Reviews' />
+                      <AppText text='View All' />
                     </View>
-                  )}
-                />
+                    <FlatList
+                      data={reviews}
+                      keyExtractor={(item) => item.id.toString()}
+                      renderItem={({ item }) => (
+                        <View style={{ paddingVertical: 10 }}>
+                          <AppText text={item.text} />
+                          {/* <MeidumText
+                  text={item.customer}
+                  style={{ fontSize: 16, paddingTop: 5 }}
+                /> */}
+                        </View>
+                      )}
+                    />
+                  </>
+                ) : (
+                  <MeidumText
+                    style={{
+                      fontSize: 20,
+                      paddingHorizontal: 20,
+                      paddingVertical: 5,
+                      textAlign: 'center',
+                    }}
+                    text='No Ratings & Reviews yet'
+                  />
+                )}
               </View>
 
               <View style={styles.footer}>
                 <OutlineBtn
-                  title="Contact Merchant"
+                  title='Contact Merchant'
                   color={Colors.white}
-                  style={{ backgroundColor: Colors.primary, width: "49%" }}
-                  iconFam="chatbox-ellipses-outline"
+                  style={{ backgroundColor: Colors.primary, width: '49%' }}
+                  iconFam='chatbox-ellipses-outline'
                   iconColor={Colors.white}
                 />
                 <OutlineBtn
-                  title="Add to Customers"
+                  title='Add to Customers'
                   color={Colors.white}
-                  style={{ backgroundColor: Colors.primary, width: "49%" }}
-                  icon="staro"
+                  style={{ backgroundColor: Colors.primary, width: '49%' }}
+                  icon='staro'
                   iconColor={Colors.white}
                 />
               </View>
@@ -177,7 +206,7 @@ export default function MarketDetails({ navigation, route }) {
 
 const styles = StyleSheet.create({
   list: {
-    width: "100%",
+    width: '100%',
     flex: 1,
     backgroundColor: Colors.light,
   },
@@ -185,14 +214,14 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   ratingTxt: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 10,
   },
   footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     padding: 10,
   },
 });

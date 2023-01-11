@@ -1,38 +1,40 @@
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import React, { useState } from "react";
-import Screen from "../Screen";
-import AppText, { MeidumText } from "../../Components/AppText";
-import Colors from "../../Config/Colors";
-import AppFormField from "../../Components/Forms/AppFormField";
-import { Formik } from "formik";
-import * as Yup from "yup";
-import axios from "axios";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import Screen from '../Screen';
+import AppText, { MeidumText } from '../../Components/AppText';
+import Colors from '../../Config/Colors';
+import AppFormField from '../../Components/Forms/AppFormField';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import axios from 'axios';
+import ActivityIndicator from '../../Components/ActivityIndicator';
 
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import SubmitButton from "../../Components/Submit";
-import Details from "./Details";
-import { useNavigation } from "@react-navigation/native";
-import ErrorMessage from "../../Components/ErrorMessage";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import SubmitButton from '../../Components/Submit';
+import Details from './Details';
+import { useNavigation } from '@react-navigation/native';
+import ErrorMessage from '../../Components/ErrorMessage';
+import { base_url } from '../../Constants/api';
 
 const ValidationSchema = Yup.object({
-  email: Yup.string().required().email().label("Email"),
-  password: Yup.string().required("Password field is required"),
-  fullName: Yup.string().required("FullName field is required"),
-  confirm_password: Yup.string().when("password", {
+  email: Yup.string().required().email().label('Email'),
+  password: Yup.string().required('Password field is required'),
+  fullName: Yup.string().required('FullName field is required'),
+  confirm_password: Yup.string().when('password', {
     is: (val) => (val && val.length > 0 ? true : false),
     then: Yup.string().oneOf(
-      [Yup.ref("password")],
-      "Both password need to be the same"
+      [Yup.ref('password')],
+      'Both password need to be the same'
     ),
   }),
 });
-const apiEndpoint =
-  "https://afromarket-be-ekn6j.ondigitalocean.app/afro-market/v1/user/signup";
+const apiEndpoint = `${base_url}/afro-market/v1/user/signup`;
 export default function Register() {
   const [visible, setVisible] = useState(false);
   const [visible1, setVisible1] = useState(false);
   const [errorMsg, setErrorMsg] = useState(false);
   const [errorContext, setErrorContext] = useState(false);
+  const [loading, setLoading] = useState(false);
   if (errorMsg) {
     setTimeout(() => {
       setErrorMsg(false);
@@ -40,44 +42,58 @@ export default function Register() {
   }
   const navigation = useNavigation();
   const handleSubmit = async (values) => {
+    setLoading(true);
     delete values.confirm_password;
     try {
       const data = await axios.post(apiEndpoint, values);
+      console.log(data.data);
+
+      setLoading(false);
+      if (data.data.status === 'success') {
+        navigation.navigate('login');
+      }
+      alert(data.data.message);
     } catch (error) {
+      console.log(error.message);
       setErrorMsg(true);
-      setErrorContext("Invalid user credential: Email already exist");
+      setLoading(false);
+      setErrorContext('Invalid user credential: Email already exist');
       return;
     }
-    console.log(response);
   };
+
+  if (loading) {
+    return <ActivityIndicator visible={loading} />;
+  }
+
   return (
     <Screen>
       <Formik
         initialValues={{
-          fullName: "",
-          email: "",
-          password: "",
-          confirm_password: "",
+          fullName: '',
+          email: '',
+          password: '',
+          confirm_password: '',
         }}
         validationSchema={ValidationSchema}
         onSubmit={handleSubmit}
       >
         <>
           <ScrollView style={styles.container}>
-            <MeidumText text="Welcome" />
+            <MeidumText text='Welcome' />
             <AppText text="Let's get you started" />
 
             <View style={styles.form}>
               <ErrorMessage visible={errorMsg} error={errorContext} />
-              <AppFormField placeholder="Full Name" name="fullName" />
+              <AppFormField placeholder='Full Name' name='fullName' />
               <AppFormField
-                placeholder="Email Address"
-                name="email"
-                keyboardType="email-address"
+                placeholder='Email Address'
+                name='email'
+                keyboardType='email-address'
               />
               <View>
                 <MaterialCommunityIcons
-                  name={!visible ? "eye" : "eye-off"}
+                  name={!visible ? 'eye' : 'eye-off'}
                   color={Colors.dark_light}
                   size={30}
                   style={styles.passEye}
@@ -85,18 +101,18 @@ export default function Register() {
                 />
                 <AppFormField
                   multiline={false}
-                  keyboardType={"default"}
+                  keyboardType={'default'}
                   autoCorrect={false}
-                  autoCapitalize="none"
+                  autoCapitalize='none'
                   spellCheck={false}
-                  placeholder="Create password"
+                  placeholder='Create password'
                   secureTextEntry={!visible}
-                  name="password"
+                  name='password'
                 />
               </View>
               <View>
                 <MaterialCommunityIcons
-                  name={!visible1 ? "eye" : "eye-off"}
+                  name={!visible1 ? 'eye' : 'eye-off'}
                   color={Colors.dark_light}
                   size={30}
                   style={styles.passEye}
@@ -104,34 +120,34 @@ export default function Register() {
                 />
                 <AppFormField
                   multiline={false}
-                  keyboardType={"default"}
+                  keyboardType={'default'}
                   autoCorrect={false}
-                  autoCapitalize="none"
+                  autoCapitalize='none'
                   spellCheck={false}
-                  placeholder="Confirm password"
+                  placeholder='Confirm password'
                   secureTextEntry={!visible1}
-                  name="confirm_password"
+                  name='confirm_password'
                 />
               </View>
             </View>
             <View style={{ padding: 30 }} />
             <View style={styles.footer}>
               <SubmitButton
-                title="Continue"
+                title='Continue'
                 color={Colors.primary}
                 style={styles.btn}
               />
               <AppText
-                text="Already have an account?"
+                text='Already have an account?'
                 style={{ fontSize: 18, marginBottom: 6 }}
               />
-              <TouchableOpacity onPress={() => navigation.navigate("login")}>
+              <TouchableOpacity onPress={() => navigation.navigate('login')}>
                 <AppText
-                  text="Login"
+                  text='Login'
                   style={{
                     fontSize: 18,
                     color: Colors.primary,
-                    fontWeight: "700",
+                    fontWeight: '700',
                   }}
                 />
               </TouchableOpacity>
@@ -145,21 +161,21 @@ export default function Register() {
 
 export function RegisterUser({ navigation }) {
   const [data, setData] = useState({
-    email: "",
-    password: "",
-    confirm_password: "",
-    first_name: "",
-    last_name: "",
-    country: "",
-    state: "",
-    phone_number: "",
-    fullName: "",
+    email: '',
+    password: '',
+    confirm_password: '',
+    first_name: '',
+    last_name: '',
+    country: '',
+    state: '',
+    phone_number: '',
+    fullName: '',
   });
   const [currentStep, setCurrentStep] = useState(0);
 
   const makeRequest = (formData) => {
-    console.log("Form Submitted", formData);
-    navigation.navigate("appNav");
+    console.log('Form Submitted', formData);
+    navigation.navigate('appNav');
   };
 
   const handleNextStep = (newData) => {
@@ -187,13 +203,13 @@ const styles = StyleSheet.create({
   },
   container: {
     mtop: 500,
-    width: "100%",
+    width: '100%',
     padding: 20,
     flex: 1,
-    height: "100%",
+    height: '100%',
   },
   passEye: {
-    position: "absolute",
+    position: 'absolute',
     right: 10,
     zIndex: 10,
     top: 25,
@@ -205,8 +221,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   footer: {
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     bottom: 30,
   },
 });

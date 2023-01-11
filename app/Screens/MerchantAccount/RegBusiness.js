@@ -15,6 +15,7 @@ import SubmitButton from '../../Components/Submit';
 import AppFormPicker from '../../Components/AppFormPicker';
 import Onboarding from './Onboarding';
 import { useNavigation } from '@react-navigation/native';
+import ActivityIndicator from '../../Components/ActivityIndicator';
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { base_url } from '../../Constants/api';
@@ -88,19 +89,11 @@ export function BusinessData({ handleNextStep, data }) {
   const business = [
     {
       id: 1,
-      label: 'Trader',
+      label: 'public limited company',
     },
     {
       id: 2,
-      label: 'Gadget',
-    },
-    {
-      id: 3,
-      label: 'Car dealer',
-    },
-    {
-      id: 4,
-      label: 'Airtime Distributor',
+      label: 'private limited company',
     },
   ];
   return (
@@ -226,6 +219,7 @@ export default function RegBusiness() {
   const apiEndpoint = base_url;
   const navigation = useNavigation();
   const [currentStep, setCurrentStep] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState({
     business_name: '',
     business_description: '',
@@ -246,6 +240,7 @@ export default function RegBusiness() {
   });
   const makeRequest = (formData) => {
     // console.log(formData);
+    setLoading(true);
     const address =
       formData.street +
       ' ' +
@@ -294,21 +289,18 @@ export default function RegBusiness() {
         },
       })
       .then((response) => {
-        console.log(response, 'response');
+        console.log(JSON.stringify(response.data), 'response');
+        setLoading(false);
+        if (response.data.status === 'success') {
+          navigation.navigate('merchantlogin');
+        }
+        alert(response.data.message);
       })
       .catch((err) => {
+        setLoading(false);
         console.log(err.message, 'error');
+        alert(err.message);
       });
-    // try {
-    //   const data = axios.post(
-    //     `${apiEndpoint}/afro-market/v1/merchant/signup`,
-    //     regForm
-    //   );
-    //   console.log('data');
-    //   console.log(data);
-    // } catch (error) {
-    //   console.log(error, 'error made/committed');
-    // }
   };
   const handleNext = (newData) => {
     setData((prev) => ({ ...prev, ...newData }));
@@ -343,7 +335,12 @@ export default function RegBusiness() {
       data={data}
     />,
   ];
-  return <>{steps[currentStep]}</>;
+  return (
+    <>
+      <ActivityIndicator visible={loading} />
+      {steps[currentStep]}
+    </>
+  );
 }
 
 const styles = StyleSheet.create({

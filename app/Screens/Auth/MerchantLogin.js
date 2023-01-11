@@ -1,34 +1,35 @@
-import jwtDecode from "jwt-decode";
+import jwtDecode from 'jwt-decode';
 import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import React, { useState } from "react";
-import Screen from "../Screen";
-import AppText, { MeidumText } from "../../Components/AppText";
+} from 'react-native';
+import React, { useState } from 'react';
+import Screen from '../Screen';
+import AppText, { MeidumText } from '../../Components/AppText';
 
-import { OutlineBtn } from "../../Components/AppBtn";
-import Colors from "../../Config/Colors";
-import * as Yup from "yup";
-import { Formik } from "formik";
-import AppFormField from "../../Components/Forms/AppFormField";
-import SubmitButton from "../../Components/Submit";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import axios from "axios";
-import ErrorMessage from "../../Components/ErrorMessage";
+import { OutlineBtn } from '../../Components/AppBtn';
+import Colors from '../../Config/Colors';
+import * as Yup from 'yup';
+import { Formik } from 'formik';
+import AppFormField from '../../Components/Forms/AppFormField';
+import SubmitButton from '../../Components/Submit';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import axios from 'axios';
+import ErrorMessage from '../../Components/ErrorMessage';
 
-import UseAuth from "../../Context/UseAuth";
-import ActivityIndicator from "../../Components/ActivityIndicator";
+import UseAuth from '../../Context/UseAuth';
+import ActivityIndicator from '../../Components/ActivityIndicator';
+import { base_url } from '../../Constants/api';
 
 const ValidationSchema = Yup.object({
-  email: Yup.string().required().email().label("Email"),
-  password: Yup.string().required("Password field is required"),
+  email: Yup.string().required().email().label('Email'),
+  password: Yup.string().required('Password field is required'),
 });
 
-const apiEndpoint = "https://afromarket-be-ekn6j.ondigitalocean.app";
+const apiEndpoint = base_url;
 export default function MerchantLogin({ navigation }) {
   const auth = UseAuth();
   const [visible, setVisible] = useState(false);
@@ -46,7 +47,7 @@ export default function MerchantLogin({ navigation }) {
         `${apiEndpoint}/afro-market/v1/merchant/login`,
         values
       );
-      if (data.status !== "success") {
+      if (data.status !== 'success') {
         return setErrorMsg(true);
       }
       auth.logIn(data.data.accesstoken);
@@ -61,29 +62,29 @@ export default function MerchantLogin({ navigation }) {
       <Formik
         validationSchema={ValidationSchema}
         initialValues={{
-          email: "",
-          password: "",
+          email: '',
+          password: '',
         }}
         onSubmit={handleSubmit}
       >
         <ScrollView>
           <View style={styles.container}>
-            <MeidumText text="Welcome Back Merchant!" />
+            <MeidumText text='Welcome Back Merchant!' />
             <AppText text="Let's pick up where you left off" />
 
             <View style={styles.form}>
               <ErrorMessage
                 visible={errorMsg}
-                error="Invalid email or password"
+                error='Invalid email or password'
               />
               <AppFormField
-                name="email"
-                placeholder="Email Address"
-                keyboardType="email-address"
+                name='email'
+                placeholder='Email Address'
+                keyboardType='email-address'
               />
               <View>
                 <MaterialCommunityIcons
-                  name={!visible ? "eye" : "eye-off"}
+                  name={!visible ? 'eye' : 'eye-off'}
                   color={Colors.dark_light}
                   size={30}
                   style={styles.passEye}
@@ -93,18 +94,18 @@ export default function MerchantLogin({ navigation }) {
                 <AppFormField
                   multiline={false}
                   autoCorrect={false}
-                  autoCapitalize="none"
+                  autoCapitalize='none'
                   spellCheck={false}
-                  placeholder="Password"
+                  placeholder='Password'
                   secureTextEntry={!visible}
-                  name="password"
+                  name='password'
                 />
               </View>
               <TouchableOpacity style={styles.forgot}>
                 <Text
                   style={{
-                    fontWeight: "500",
-                    fontFamily: "lato-bold",
+                    fontWeight: '500',
+                    fontFamily: 'lato-bold',
                     fontSize: 15,
                   }}
                 >
@@ -114,7 +115,7 @@ export default function MerchantLogin({ navigation }) {
             </View>
             <View style={styles.btnContainer}>
               <SubmitButton
-                title="Login"
+                title='Login'
                 color={Colors.primary}
                 style={styles.btn}
               />
@@ -122,16 +123,16 @@ export default function MerchantLogin({ navigation }) {
           </View>
           <View style={styles.footer}>
             <AppText
-              text="Are you new here?"
+              text='Are you new here?'
               style={{ fontSize: 18, marginBottom: 5 }}
             />
-            <TouchableOpacity onPress={() => navigation.navigate("merchant")}>
+            <TouchableOpacity onPress={() => navigation.navigate('merchant')}>
               <AppText
-                text="Create Merchant account"
+                text='Create Merchant account'
                 style={{
                   fontSize: 18,
                   color: Colors.primary,
-                  fontWeight: "700",
+                  fontWeight: '700',
                 }}
               />
             </TouchableOpacity>
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
   },
   container: {
     mtop: 500,
-    width: "100%",
+    width: '100%',
     padding: 20,
     flex: 1,
   },
@@ -159,20 +160,20 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   btnContainer: {
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     bottom: -150,
     marginBottom: 90,
   },
   passEye: {
-    position: "absolute",
+    position: 'absolute',
     right: 10,
     zIndex: 10,
     top: 25,
   },
   footer: {
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
     bottom: -20,
     // position: "absolute",
